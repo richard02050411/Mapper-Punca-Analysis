@@ -1,0 +1,35 @@
+getDimensions (ImageWidth, ImageHeight, ImageChannels, ImageSlices, ImageFrames);
+currentDir = File.directory;
+file = File.nameWithoutExtension;
+Area = newArray(ImageFrames);
+MFI = newArray(ImageFrames);
+count = newArray(ImageFrames);
+Stack.setPosition(1,1,1);
+run("Clear Results");
+for (i = 1; i < ImageFrames; i++) {
+	run("Clear Results");
+	Stack.setFrame(i);
+	run("Auto Threshold", "method=MaxEntropy ignore_black white");
+	run("Analyze Particles...", "size=8-Infinity pixel display clear slice");
+	if (nResults==0) {
+		Area[i]=0;
+		MFI[i]=0;
+		count[i]=0;
+	} else if (nResults==1) {
+		Area[i] = getResult("Area", 0);
+		MFI[i] = getResult("Mean", 0);
+		count[i] = 1;
+	}
+	else
+		{
+			run("Summarize");
+			Area[i] = getResult("Area", nResults-4);
+			MFI[i] = getResult("Mean", nResults-4);
+			count[i] = nResults-4;
+	}
+}
+Array.show("101", Area, MFI, count);
+saveAs("Text", currentDir + file +"-Mapper-dot.csv");
+close("*");
+
+
